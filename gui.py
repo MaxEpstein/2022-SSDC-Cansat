@@ -66,11 +66,8 @@ _VARS = {'window': False,
 
 ID = 1063
 PT1 = 'C'
-PT2 = 'P'
 SS1 = 'LAUNCH_AWAITING'
-SS2 = 'LAUNCH_AWAITING'
 PC1 = 1
-PC2 = 1
 MODE = 'S'
 TP_DEPLOY = 'F'
 CMD_ECHO = 'OFF'
@@ -99,15 +96,12 @@ top_banner = [[sg.Text('gSat ID: '+str(ID), font='Any 26', background_color='#1B
 second_row = [[sg.Text('Packet Type 1: '+ PT1, size=(14), font='Any 16', background_color='#1B2838', key = 'PT1'),
                sg.Text('Mode: '+MODE, size=(7), font='Any 16', background_color='#1B2838', key = 'Mode'),
                sg.Text('GPS Time: ' + clock(), size=(18), font='Any 16', background_color='#1B2838', key='gpsTime'),
-               sg.Text('Software State 1: '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'SS1'),
-               sg.Text('Packet Type 2: ' + PT2, size=(14), font='Any 16', background_color='#1B2838', key = 'PT2'),
-               sg.Text('Software State 2: '+SS2, size=(32), font='Any 16', background_color='#1B2838', key = 'SS2')]]
+               sg.Text('Software State 1: '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'SS1')]]
 
 third_row = [[sg.Text('Packet Count 1: '+str(PC1), size=(17), font='Any 16', background_color='#1B2838', key = 'PC1'),
                sg.Text('TP Deploy: '+TP_DEPLOY, size=(11), font='Any 16', background_color='#1B2838', key = 'TPD'),
                sg.Text('GPS Sat: ', size=(13), font='Any 16', background_color='#1B2838', key = 'GPS_SAT'),
-               sg.Text('CMD Echo: '+CMD_ECHO, size=(31), font='Any 16', background_color='#1B2838', key = 'CMD_ECH'),
-               sg.Text('Packet Count 2: '+str(PC2), size=(18), font='Any 16', background_color='#1B2838', key = 'PC2')]]
+               sg.Text('CMD Echo: '+CMD_ECHO, size=(31), font='Any 16', background_color='#1B2838', key = 'CMD_ECH')]]
 
 fourth_row = [[sg.Canvas(key='figCanvas0'),
                sg.Canvas(key='figCanvas1'),
@@ -125,7 +119,7 @@ sixth_row = [[sg.Text('CMD', size=(8), font = 'Any 26', background_color='#1B283
               sg.Input(size=(30)),
               sg.Button('Send',size=(18), font='Any 16'),
               sg.Text(' '*100),
-              sg.Image(directory+'/GUI/images/Legend1.png')]]
+              sg.Image(directory+'\Legend1.png')]]
 
 
 layout = [[top_banner],
@@ -141,64 +135,30 @@ _VARS['window'] = sg.Window('test window', layout, margins=(0,0), location=(0,0)
 # <TEMP>, <VOLTAGE>, < GPS_TIME>, <GPS_LATITUDE>, <GPS_LONGITUDE>, <GPS_ALTITUDE>, <GPS_SATS>, 
 # <SOFTWARE_STATE>, <CMD_ECHO>
 
-def getCanData(point):  # get data from canister csv file
-    global PC1
-    global MODE
-    global TP_DEPLOY
-    global SS1
-    global ID
-    global CMD_ECHO
-    global PT1
-    global GPS_SAT
-
-    if (PC1 > 7):
-        data = pd.read_csv('Flight_1063_C.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "T+ TIME", "PACKET_COUNT", 
-        "PACKET_TYPE", "MODE", "TP_RELEASED", "ALTITUDE", "TEMP", "VOLTAGE", "GPS_TIME", "GPS_LATITUDE", "GPS_LONGITUDE", 
-        "GPS_ALTITUDE", "GPS_SATS", "SOFTWARE_STATE", "CMD_ECHO"], skiprows=PC1-8)
-    
-    else:
-        data = pd.read_csv('Flight_1063_C.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "T+ TIME", "PACKET_COUNT", 
-        "PACKET_TYPE", "MODE", "TP_RELEASED", "ALTITUDE", "TEMP", "VOLTAGE", "GPS_TIME", "GPS_LATITUDE", "GPS_LONGITUDE", 
-        "GPS_ALTITUDE", "GPS_SATS", "SOFTWARE_STATE", "CMD_ECHO"], skiprows=1)
-    
-
-    if (point%4 == 1 or point == 0):
-       PC1 = data['PACKET_COUNT'][8]
-
-    tPlus = data['T+ TIME']
-    alt = data['ALTITUDE']
-    temp = data['TEMP']
-    volt = data['VOLTAGE']
-    gpsLAT = data['GPS_LATITUDE']
-    gpsLONG = data['GPS_LONGITUDE']
-    gpsALT = data['GPS_ALTITUDE']
-    print(PC1)
-    GPS_SAT = data['GPS_SATS'][PC1-1]
-    ID = data['TEAM_ID'][PC1-1]
-    MODE = data['MODE'][PC1-1]
-    TP_DEPLOY = data['TP_RELEASED'][PC1-1]
-    SS1 = data['SOFTWARE_STATE'][PC1-1]
-    PT1 = data['PACKET_TYPE'][PC1-1]
-    CMD_ECHO = data['CMD_ECHO'][PC1-1]
-
-    _VARS['window']['PC1'].update('Packet Count 1: ' + str(PC1))
-    _VARS['window']['Mode'].update('Mode: ' + MODE)
-    _VARS['window']['TPD'].update('TP Deploy: ' + str(TP_DEPLOY))
-    _VARS['window']['SS1'].update('Software State 1: ' + SS1)
-    _VARS['window']['PT1'].update('Packet Type 1: ' + PT1)
-    _VARS['window']['CMD_ECH'].update('CMD Echo: ' + CMD_ECHO)
-    _VARS['window']['GPS_SAT'].update('GPS Sat: ' + str(GPS_SAT))
-
-    return (tPlus, alt, temp, volt, gpsLAT, gpsLONG, gpsALT)
 
 def getPayloadData():
-        data = pd.read_csv('Flight_5063_P.csv')
 
-        global PC2
-        global PT2
-        global SS2
+        global PC1
+        global PT1
+        global SS1
 
-        PC2 = data['PACKET_COUNT'][PC2]
+        if (int(PC1) > 7):
+            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
+        "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
+        "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=int(PC1)-8)
+            PC1 = data['PACKET_COUNT'][7]
+            SS1 = data['TP_SOFTWARE_STATE'][7]
+            PT1 = data['PACKET_TYPE'][7]
+    
+        else:
+            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
+        "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
+        "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=1)
+            PC1 = data['PACKET_COUNT'][int(PC1)]
+            SS1 = data['TP_SOFTWARE_STATE'][int(PC1)]
+            PT1 = data['PACKET_TYPE'][int(PC1)]
+
+        
 
         tPlusP = data['T+ Time']
         altP = data['TP_ALTITUDE']
@@ -215,12 +175,11 @@ def getPayloadData():
         magY = data['MAG_Y']
         pe = data['POINTING_ERROR']
 
-        SS2 = data['TP_SOFTWARE_STATE'][PC2-1]
-        PT2 = data['PACKET_TYPE'][PC2-1]
+        
 
-        _VARS['window']['PC2'].update('Packet Count 2: ' + str(PC2))
-        _VARS['window']['SS2'].update('Software State 2: ' + SS2)
-        _VARS['window']['PT2'].update('Packet Type 2: ' + PT2)
+        _VARS['window']['PC1'].update('Packet Count 1: ' + str(PC1))
+        _VARS['window']['SS1'].update('Software State 1: ' + SS1)
+        _VARS['window']['PT1'].update('Packet Type 1: ' + PT1)
 
         return(tPlusP, altP, tempP, voltP, gyroR, gyroP, gyroY, accelR,
         accelP, accelY, magR, magP, magY, pe)
@@ -280,45 +239,11 @@ while (i < 10):
 
 #create clock to keep track of frame in order to update graph??
 #use panda to trigger new update in csv file and send to graph to update??
-
-def updateCanChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
-
-    start = math.floor(start0/4)
-    end = math.floor(start0/4)+7
-
-    canData = getCanData(start0)
-    canTPlus = canData[0][start:end]          #gets x values between range  THIS IS GETTING THE DATA AT PC1-7 to PC1 NOT THE ACTUAL VALUES
-    canAlt = canData[1][start:end]          #gets y values between range
-    canTemp = canData[2][start:end]
-    canVolt = canData[3][start:end]
-    gpsLat = canData[4][start:end]
-    gpsLong = canData[5][start:end]
-    gpsAlt = canData[6][start:end]
-
-    _VARS['pltsubFig0'].plot(canTPlus, canAlt, '-k')
-
-    _VARS['pltsubFig1'].plot(canTPlus, canTemp, '-k')
-
-    _VARS['pltsubFig2'].plot(canTPlus, canVolt, '-k')
-
-    _VARS['pltsubFig5'].plot(canTPlus, gpsLat, '-k')
-
-    _VARS['pltsubFig6'].plot(canTPlus, gpsLong, '-k')
-
-    _VARS['pltsubFig7'].plot(canTPlus, gpsAlt, '-k')
-
-    #_VARS['fig_agg0'].draw()
-    #_VARS['fig_agg1'].draw()
-    #_VARS['fig_agg2'].draw()
-    #_VARS['fig_agg5'].draw()
-    #_VARS['fig_agg6'].draw()
-    #_VARS['fig_agg7'].draw()
-
     
 
 def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
     start  = start0
-    end = (start0+27)
+    end = (start0+7)
 
     payloadData = getPayloadData()
 
@@ -347,9 +272,6 @@ def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
     _VARS['pltsubFig7'].cla()
     _VARS['pltsubFig8'].cla()
     _VARS['pltsubFig9'].cla()
-
-
-    updateCanChart(start0)
 
     _VARS['pltsubFig0'].plot(payTPlus, payAlt, '-r')
 
@@ -391,7 +313,6 @@ def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
 _VARS['window'].maximize()
 
 
-#updateCanChart(0,7)
 updatePayloadChart(0)
 i=0
 
@@ -404,7 +325,6 @@ while True:
     _VARS['window']['gpsTime'].update('GPS Time: ' + clock())
 
     time.sleep(.02)
-    #updateCanChart(i,i+7)
     updatePayloadChart(i)
     i+=1
 
