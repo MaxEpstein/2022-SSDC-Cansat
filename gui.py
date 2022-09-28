@@ -142,7 +142,7 @@ def getPayloadData():
         global PT1
         global SS1
 
-        if (int(PC1) > 7):
+        if (int(PC1) > 8):
             data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
         "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
         "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=int(PC1)-8)
@@ -154,9 +154,9 @@ def getPayloadData():
             data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
         "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
         "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=1)
-            PC1 = data['PACKET_COUNT'][int(PC1)]
-            SS1 = data['TP_SOFTWARE_STATE'][int(PC1)]
-            PT1 = data['PACKET_TYPE'][int(PC1)]
+            PC1 = data['PACKET_COUNT'][int(PC1)-1]
+            SS1 = data['TP_SOFTWARE_STATE'][int(PC1)-1]
+            PT1 = data['PACKET_TYPE'][int(PC1)-1]
 
         
 
@@ -243,7 +243,7 @@ while (i < 10):
 
 def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
     start  = start0
-    end = (start0+7)
+    end = (start0+8)
 
     payloadData = getPayloadData()
 
@@ -324,7 +324,7 @@ while True:
     _VARS['window']['time'].update(clock())
     _VARS['window']['gpsTime'].update('GPS Time: ' + clock())
 
-    time.sleep(.02)
+    time.sleep(.2)
     updatePayloadChart(i)
     i+=1
 
