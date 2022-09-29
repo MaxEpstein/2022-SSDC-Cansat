@@ -65,12 +65,14 @@ _VARS = {'window': False,
 # Helper Functions
 
 ID = 1063
-PT1 = 'C'
-SS1 = 'LAUNCH_AWAITING'
+PT1 = 'U'
+SS1 = 'U'
 PC1 = 1
-MODE = 'S'
-TP_DEPLOY = 'F'
-CMD_ECHO = 'OFF'
+MODE = 'U'
+HS_DEPLOY = 'U'
+PC_DEPLOY = 'U'
+MAST_RAISED = 'N'
+CMD_ECHO = 'U'
 GPS_SAT = 0
 
 #ion() #turns interative mode on
@@ -93,15 +95,16 @@ top_banner = [[sg.Text('gSat ID: '+str(ID), font='Any 26', background_color='#1B
                sg.Button('Connect', font='Any 16'),
                sg.Button('Close', font='Any 16')]]
 
-second_row = [[sg.Text('Packet Type 1: '+ PT1, size=(14), font='Any 16', background_color='#1B2838', key = 'PT1'),
-               sg.Text('Mode: '+MODE, size=(7), font='Any 16', background_color='#1B2838', key = 'Mode'),
+second_row = [[sg.Text('PC DEPOY: '+ PC_DEPLOY, size=(14), font='Any 16', background_color='#1B2838', key = 'PC_DEPLOY'),
+               sg.Text('Mode: '+MODE, size=(7), font='Any 16', background_color='#1B2838', key = 'MODE'),
                sg.Text('GPS Time: ' + clock(), size=(18), font='Any 16', background_color='#1B2838', key='gpsTime'),
-               sg.Text('Software State 1: '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'SS1')]]
+               sg.Text('Software State : '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'SS1')]]
 
 third_row = [[sg.Text('Packet Count 1: '+str(PC1), size=(17), font='Any 16', background_color='#1B2838', key = 'PC1'),
-               sg.Text('TP Deploy: '+TP_DEPLOY, size=(11), font='Any 16', background_color='#1B2838', key = 'TPD'),
+               sg.Text('HS Deploy: '+HS_DEPLOY, size=(11), font='Any 16', background_color='#1B2838', key = 'HS_DEPLOY'),
+               sg.Text('Mast Raised: '+MAST_RAISED, size=(11), font='Any 16', background_color='#1B2838', key = 'MAST_RAISED'),
                sg.Text('GPS Sat: ', size=(13), font='Any 16', background_color='#1B2838', key = 'GPS_SAT'),
-               sg.Text('CMD Echo: '+CMD_ECHO, size=(31), font='Any 16', background_color='#1B2838', key = 'CMD_ECH')]]
+               sg.Text('CMD Echo: '+CMD_ECHO, size=(31), font='Any 16', background_color='#1B2838', key = 'CMD_ECHO')]]
 
 fourth_row = [[sg.Canvas(key='figCanvas0'),
                sg.Canvas(key='figCanvas1'),
@@ -131,9 +134,11 @@ layout = [[top_banner],
 
 _VARS['window'] = sg.Window('test window', layout, margins=(0,0), location=(0,0), finalize=True)
 
-#<TEAM_ID>,< MISSION_TIME>, <PACKET_COUNT>,<PACKET_TYPE>,<MODE>, <TP_RELEASED>, <ALTITUDE>, 
-# <TEMP>, <VOLTAGE>, < GPS_TIME>, <GPS_LATITUDE>, <GPS_LONGITUDE>, <GPS_ALTITUDE>, <GPS_SATS>, 
-# <SOFTWARE_STATE>, <CMD_ECHO>
+#TEAM_ID, MISSION_TIME, PACKET_COUNT, MODE, STATE, ALTITUDE,
+#HS_DEPLOYED, PC_DEPLOYED, MAST_RAISED, TEMPERATURE, VOLTAGE,
+#GPS_TIME, GPS_ALTITUDE, GPS_LATITUDE, GPS_LONGITUDE, GPS_SATS,
+#TILT_X, TILT_Y, CMD_ECHO
+
 
 
 def getPayloadData():
@@ -143,46 +148,56 @@ def getPayloadData():
         global SS1
 
         if (int(PC1) > 8):
-            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
-        "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
-        "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=int(PC1)-8)
+            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
+                "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
+                "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
+                "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"], skiprows=int(PC1)-8)
             PC1 = data['PACKET_COUNT'][7]
             SS1 = data['TP_SOFTWARE_STATE'][7]
             PT1 = data['PACKET_TYPE'][7]
     
         else:
-            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["PAYLOAD_ID", "MISSION_TIME", "T+ Time", "PACKET_COUNT", 
-        "PACKET_TYPE", "TP_ALTITUDE", "TP_TEMP", "TP_VOLTAGE", "GYRO_R", "GYRO_P", "GYRO_Y", "ACCEL_R", "ACCEL_P", 
-        "ACCEL_Y", "MAG_R", "MAG_P", "MAG_Y", "POINTING_ERROR", 'TP_SOFTWARE_STATE'], skiprows=1)
+            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
+                "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
+                "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
+                "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"], skiprows=1)
+
             PC1 = data['PACKET_COUNT'][int(PC1)-1]
-            SS1 = data['TP_SOFTWARE_STATE'][int(PC1)-1]
-            PT1 = data['PACKET_TYPE'][int(PC1)-1]
+            SS1 = data['STATE'][int(PC1)-1]
+
+            MODE = data['MODE'][int(PC1)-1]
+            HS_DEPLOY = data['HS_DEPLOYED'][int(PC1)-1]
+            PC_DEPLOY = data['PC_DEPLOYED'][int(PC1)-1]
+            MAST_RAISED = data['MAST_RAISED'][int(PC1)-1]
+            CMD_ECHO = data['CMD_ECHO'][int(PC1)-1]
+            GPS_SAT = data['GPS_SATS'][int(PC1)-1]
 
         
 
         tPlusP = data['T+ Time']
-        altP = data['TP_ALTITUDE']
-        tempP = data['TP_TEMP']
-        voltP = data['TP_VOLTAGE']
-        gyroR = data['GYRO_R']
-        gyroP = data['GYRO_P']
-        gyroY = data['GYRO_Y']
-        accelR = data['ACCEL_R']
-        accelP = data['ACCEL_P']
-        accelY = data['ACCEL_Y']
-        magR = data['MAG_R']
-        magP = data['MAG_P']
-        magY = data['MAG_Y']
-        pe = data['POINTING_ERROR']
+        altP = data['ALTITUDE']
+        tempP = data['TEMPERATURE']
+        voltP = data['VOLTAGE']
+        gpsAlt = data['GPS_ALTITUDE']
+        gpsLat = data['GPS_LATITUDE']
+        gpsLong = data['GPS_LONGITUDE']
+        tiltX = data['TILT_X']
+        tiltY = data['TILT_Y']
 
         
 
-        _VARS['window']['PC1'].update('Packet Count 1: ' + str(PC1))
-        _VARS['window']['SS1'].update('Software State 1: ' + SS1)
-        _VARS['window']['PT1'].update('Packet Type 1: ' + PT1)
+        _VARS['window']['PC1'].update('Packet Count : ' + str(PC1))
+        _VARS['window']['SS1'].update('Software State : ' + SS1)
 
-        return(tPlusP, altP, tempP, voltP, gyroR, gyroP, gyroY, accelR,
-        accelP, accelY, magR, magP, magY, pe)
+        _VARS['window']['MODE'].update('Mode : ' + MODE)
+        _VARS['window']['HS_DEPLOY'].update('HS Deploy : ' + HS_DEPLOY)
+        _VARS['window']['PC_DEPLOY'].update('PC Deploy : ' + PC_DEPLOY)
+        _VARS['window']['MAST_RAISED'].update('Mast Raised : ' + MAST_RAISED)
+        _VARS['window']['CMD_ECHO'].update('CMD Echo : ' + CMD_ECHO)
+        _VARS['window']['GPS_SAT'].update('GPS Sat : ' + str(GPS_SAT))
+
+
+        return(tPlusP, altP, tempP, voltP, gpsAlt, gpsLat, gpsLong, tiltX, tiltY)
 
 def setyAxis():      #only done once in drawchart function to set axies
     _VARS['pltAxis0'].set_ylabel('Altitude')
@@ -245,22 +260,19 @@ def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
     start  = start0
     end = (start0+8)
 
+    # tPlusP, altP, tempP, voltP, gpsAlt, gpsLat, gpsLong, tiltX, tiltY
+
     payloadData = getPayloadData()
 
     payTPlus = payloadData[0][start:end]
     payAlt = payloadData[1][start:end]
     payTemp = payloadData[2][start:end]
     payVolt = payloadData[3][start:end]
-    gyroR = payloadData[4][start:end] 
-    gyroP = payloadData[5][start:end] 
-    gyroY = payloadData[6][start:end] 
-    accelR = payloadData[7][start:end] 
-    accelP = payloadData[8][start:end] 
-    accelY = payloadData[9][start:end] 
-    magR = payloadData[10][start:end] 
-    magP = payloadData[11][start:end] 
-    magY = payloadData[12][start:end] 
-    pe = payloadData[13][start:end] 
+    gpsAlt = payloadData[4][start:end] 
+    gpsLat = payloadData[5][start:end] 
+    gpsLong = payloadData[6][start:end] 
+    tiltX = payloadData[7][start:end] 
+    tiltY = payloadData[8][start:end] 
 
     _VARS['pltsubFig0'].cla()
     _VARS['pltsubFig1'].cla()
@@ -279,19 +291,13 @@ def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
 
     _VARS['pltsubFig2'].plot(payTPlus, payVolt, '-r')
 
-    _VARS['pltsubFig3'].plot(payTPlus, gyroR, orange)
-    _VARS['pltsubFig3'].plot(payTPlus, gyroP, '-m')
-    _VARS['pltsubFig3'].plot(payTPlus, gyroY, brown)
+    _VARS['pltsubFig3'].plot(payTPlus, gpsAlt, orange)
 
-    _VARS['pltsubFig4'].plot(payTPlus, accelR, orange)
-    _VARS['pltsubFig4'].plot(payTPlus, accelP, '-m')
-    _VARS['pltsubFig4'].plot(payTPlus, accelY, brown)
+    _VARS['pltsubFig4'].plot(payTPlus, gpsLat, orange)
+    _VARS['pltsubFig4'].plot(payTPlus, gpsLong, '-m')
 
-    _VARS['pltsubFig8'].plot(payTPlus, magR, orange)
-    _VARS['pltsubFig8'].plot(payTPlus, magP, '-m')
-    _VARS['pltsubFig8'].plot(payTPlus, magY, brown)
-
-    _VARS['pltsubFig9'].plot(payTPlus, pe, '-r')
+    _VARS['pltsubFig8'].plot(payTPlus, tiltX, orange)
+    _VARS['pltsubFig8'].plot(payTPlus, tiltY, '-m')
 
     setyAxis()
 
