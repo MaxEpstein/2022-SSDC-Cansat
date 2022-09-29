@@ -62,7 +62,7 @@ _VARS = {'window': False,
          'pltAxis8': False,
          'pltAxis9': False}
 
-# Helper Functions
+# Initialization of Variables
 
 ID = 1063
 PT1 = 'U'
@@ -71,11 +71,10 @@ PC1 = 1
 MODE = 'U'
 HS_DEPLOY = 'U'
 PC_DEPLOY = 'U'
-MAST_RAISED = 'N'
+MAST_RAISE = 'U'
 CMD_ECHO = 'U'
 GPS_SAT = 0
 
-#ion() #turns interative mode on
 
 def draw_figure(canvas, figure):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
@@ -96,15 +95,15 @@ top_banner = [[sg.Text('gSat ID: '+str(ID), font='Any 26', background_color='#1B
                sg.Button('Close', font='Any 16')]]
 
 second_row = [[sg.Text('PC DEPOY: '+ PC_DEPLOY, size=(14), font='Any 16', background_color='#1B2838', key = 'PC_DEPLOY'),
-               sg.Text('Mode: '+MODE, size=(7), font='Any 16', background_color='#1B2838', key = 'MODE'),
+               sg.Text('Mode: '+ MODE, size=(13), font='Any 16', background_color='#1B2838', key = 'MODE'),
                sg.Text('GPS Time: ' + clock(), size=(18), font='Any 16', background_color='#1B2838', key='gpsTime'),
-               sg.Text('Software State : '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'SS1')]]
+               sg.Text('Software State : '+SS1, size=(32), font='Any 16', background_color='#1B2838', key = 'STATE')]]
 
 third_row = [[sg.Text('Packet Count 1: '+str(PC1), size=(17), font='Any 16', background_color='#1B2838', key = 'PC1'),
-               sg.Text('HS Deploy: '+HS_DEPLOY, size=(11), font='Any 16', background_color='#1B2838', key = 'HS_DEPLOY'),
-               sg.Text('Mast Raised: '+MAST_RAISED, size=(11), font='Any 16', background_color='#1B2838', key = 'MAST_RAISED'),
+               sg.Text('HS Deploy: '+HS_DEPLOY, size=(15), font='Any 16', background_color='#1B2838', key = 'HS_DEPLOY'),
+               sg.Text('Mast Raised: '+MAST_RAISE, size=(15), font='Any 16', background_color='#1B2838', key = 'MAST_RAISED'),
                sg.Text('GPS Sat: ', size=(13), font='Any 16', background_color='#1B2838', key = 'GPS_SAT'),
-               sg.Text('CMD Echo: '+CMD_ECHO, size=(31), font='Any 16', background_color='#1B2838', key = 'CMD_ECHO')]]
+               sg.Text('CMD Echo: '+CMD_ECHO, size=(25), font='Any 16', background_color='#1B2838', key = 'CMD_ECHO')]]
 
 fourth_row = [[sg.Canvas(key='figCanvas0'),
                sg.Canvas(key='figCanvas1'),
@@ -139,22 +138,25 @@ _VARS['window'] = sg.Window('test window', layout, margins=(0,0), location=(0,0)
 #GPS_TIME, GPS_ALTITUDE, GPS_LATITUDE, GPS_LONGITUDE, GPS_SATS,
 #TILT_X, TILT_Y, CMD_ECHO
 
-
+#GPS TIME NEEDS TO BE PULLED FROM FILE. CURRENTLY IS NOT. 
 
 def getPayloadData():
 
         global PC1
         global PT1
         global SS1
+        global MODE
+        global HS_DEPLOY
+        global PC_DEPLOY
+        global MAST_RAISE
+        global CMD_ECHO
+        global GPS_SAT 
 
         if (int(PC1) > 8):
             data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
                 "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
                 "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
                 "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"], skiprows=int(PC1)-8)
-            PC1 = data['PACKET_COUNT'][7]
-            SS1 = data['TP_SOFTWARE_STATE'][7]
-            PT1 = data['PACKET_TYPE'][7]
     
         else:
             data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
@@ -162,17 +164,15 @@ def getPayloadData():
                 "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
                 "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"], skiprows=1)
 
-            PC1 = data['PACKET_COUNT'][int(PC1)-1]
-            SS1 = data['STATE'][int(PC1)-1]
 
-            MODE = data['MODE'][int(PC1)-1]
-            HS_DEPLOY = data['HS_DEPLOYED'][int(PC1)-1]
-            PC_DEPLOY = data['PC_DEPLOYED'][int(PC1)-1]
-            MAST_RAISED = data['MAST_RAISED'][int(PC1)-1]
-            CMD_ECHO = data['CMD_ECHO'][int(PC1)-1]
-            GPS_SAT = data['GPS_SATS'][int(PC1)-1]
-
-        
+        PC1 = data['PACKET_COUNT'][len(data)-1]
+        SS1 = data['STATE'][len(data)-1]
+        MODE = data['MODE'][len(data)-1]
+        HS_DEPLOY = data['HS_DEPLOYED'][len(data)-1]
+        PC_DEPLOY = data['PC_DEPLOYED'][len(data)-1]
+        MAST_RAISE = data['MAST_RAISED'][len(data)-1]
+        CMD_ECHO = data['CMD_ECHO'][len(data)-1]
+        GPS_SAT = data['GPS_SATS'][len(data)-1]
 
         tPlusP = data['T+ Time']
         altP = data['ALTITUDE']
@@ -184,15 +184,15 @@ def getPayloadData():
         tiltX = data['TILT_X']
         tiltY = data['TILT_Y']
 
-        
+        print(MAST_RAISE)
 
         _VARS['window']['PC1'].update('Packet Count : ' + str(PC1))
-        _VARS['window']['SS1'].update('Software State : ' + SS1)
+        _VARS['window']['STATE'].update('Software State : ' + SS1)
 
         _VARS['window']['MODE'].update('Mode : ' + MODE)
         _VARS['window']['HS_DEPLOY'].update('HS Deploy : ' + HS_DEPLOY)
         _VARS['window']['PC_DEPLOY'].update('PC Deploy : ' + PC_DEPLOY)
-        _VARS['window']['MAST_RAISED'].update('Mast Raised : ' + MAST_RAISED)
+        _VARS['window']['MAST_RAISED'].update('Mast Raised : ' + str(MAST_RAISE))
         _VARS['window']['CMD_ECHO'].update('CMD Echo : ' + CMD_ECHO)
         _VARS['window']['GPS_SAT'].update('GPS Sat : ' + str(GPS_SAT))
 
@@ -256,23 +256,21 @@ while (i < 10):
 #use panda to trigger new update in csv file and send to graph to update??
     
 
-def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
-    start  = start0
-    end = (start0+8)
+def updatePayloadChart():   #THIS TAKES ALL DATA AND GRAPHS IT
 
     # tPlusP, altP, tempP, voltP, gpsAlt, gpsLat, gpsLong, tiltX, tiltY
 
     payloadData = getPayloadData()
 
-    payTPlus = payloadData[0][start:end]
-    payAlt = payloadData[1][start:end]
-    payTemp = payloadData[2][start:end]
-    payVolt = payloadData[3][start:end]
-    gpsAlt = payloadData[4][start:end] 
-    gpsLat = payloadData[5][start:end] 
-    gpsLong = payloadData[6][start:end] 
-    tiltX = payloadData[7][start:end] 
-    tiltY = payloadData[8][start:end] 
+    payTPlus = payloadData[0]
+    payAlt = payloadData[1]
+    payTemp = payloadData[2]
+    payVolt = payloadData[3]
+    gpsAlt = payloadData[4]
+    gpsLat = payloadData[5]
+    gpsLong = payloadData[6]
+    tiltX = payloadData[7]
+    tiltY = payloadData[8]
 
     _VARS['pltsubFig0'].cla()
     _VARS['pltsubFig1'].cla()
@@ -319,8 +317,10 @@ def updatePayloadChart(start0):   #THIS TAKES ALL DATA AND GRAPHS IT
 _VARS['window'].maximize()
 
 
-updatePayloadChart(0)
+#updatePayloadChart()
 i=0
+
+fileLength = 0
 
 while True:
     event, values = _VARS['window'].read(timeout=10)
@@ -330,9 +330,11 @@ while True:
     _VARS['window']['time'].update(clock())
     _VARS['window']['gpsTime'].update('GPS Time: ' + clock())
 
-    time.sleep(.2)
-    updatePayloadChart(i)
-    i+=1
+    data = pd.read_csv('Flight_5063_P.csv', usecols = ["PACKET_COUNT"])       #checks to see if line has been added to canister csv file
+    if (len(data) >  fileLength):
+        fileLength = len(data)
+        updatePayloadChart()
+
 
 _VARS['window'].close()
 
