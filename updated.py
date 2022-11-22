@@ -64,7 +64,7 @@ _VARS = {'window': False,
 
 # Initialization of Variables
 
-ID = 1063
+TEAM_ID = 0000
 PT1 = 'U'
 SS1 = 'U'
 PC1 = 1
@@ -88,7 +88,7 @@ directory = format(os.getcwd())
 def clock():
     return (time.strftime("%H:%M:%S", time.gmtime()))
 
-top_banner = [[sg.Text('gSat ID: '+str(ID), font='Any 26', background_color='#1B2838', border_width=(5), size=(40)),
+top_banner = [[sg.Text('Team ID: '+str(TEAM_ID), font='Any 26', background_color='#1B2838', border_width=(5), size=(40), key = 'TEAM_ID'),
                sg.Text(clock(), font='Any 22', background_color='#1B2838', key='time', border_width=(8), size=(10)),
                sg.Button('Calibrate', font='Any 16'),
                sg.Button('Connect', font='Any 16'),
@@ -153,18 +153,18 @@ def getPayloadData():
         global GPS_SAT 
 
         if (int(PC1) > 8):
-            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
+            data = pd.read_csv('Flight_1032.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
                 "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
                 "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
                 "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time", "Acceleration"], skiprows=int(PC1)-8)
     
         else:
-            data = pd.read_csv('Flight_5063_P.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
+            data = pd.read_csv('Flight_1032.csv', header=None, names=["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
                 "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
                 "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
                 "TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time", "Acceleration"], skiprows=1)
 
-
+        TEAM_ID = data['TEAM_ID'][len(data)-1]
         PC1 = data['PACKET_COUNT'][len(data)-1]
         SS1 = data['STATE'][len(data)-1]
         MODE = data['MODE'][len(data)-1]
@@ -185,8 +185,7 @@ def getPayloadData():
         tiltY = data['TILT_Y']
         accel = data['Acceleration']
 
-        print(MAST_RAISE)
-
+        _VARS['window']['TEAM_ID'].update('Team ID: ' + str(TEAM_ID))
         _VARS['window']['PC1'].update('Packet Count : ' + str(PC1))
         _VARS['window']['STATE'].update('Software State : ' + SS1)
 
@@ -292,15 +291,15 @@ def updatePayloadChart():   #THIS TAKES ALL DATA AND GRAPHS IT
 
     _VARS['pltsubFig2'].plot(payTPlus, payVolt, '-b')
 
-    _VARS['pltsubFig3'].plot(payTPlus, tiltX, '-b')
+    _VARS['pltsubFig3'].plot(payTPlus, tiltX, '-k')
 
-    _VARS['pltsubFig4'].plot(payTPlus, tiltY, '-b')
+    _VARS['pltsubFig4'].plot(payTPlus, tiltY, '-k')
 
     _VARS['pltsubFig5'].plot(payTPlus, gpsAlt, '-b')
 
-    _VARS['pltsubFig6'].plot(payTPlus, gpsLat, '-b')
+    _VARS['pltsubFig6'].plot(payTPlus, gpsLat, '-r')
 
-    _VARS['pltsubFig7'].plot(payTPlus, gpsLong, '-b')
+    _VARS['pltsubFig7'].plot(payTPlus, gpsLong, '-r')
 
     _VARS['pltsubFig8'].plot(payTPlus, accel, '-b')
 
@@ -337,7 +336,7 @@ while True:
     _VARS['window']['time'].update(clock())
     _VARS['window']['gpsTime'].update('GPS Time: ' + clock())
 
-    data = pd.read_csv('Flight_5063_P.csv', usecols = ["PACKET_COUNT"])       #checks to see if line has been added to canister csv file
+    data = pd.read_csv('Flight_1032.csv', usecols = ["PACKET_COUNT"])       #checks to see if line has been added to canister csv file
     if (len(data) >  fileLength):
         fileLength = len(data)
         updatePayloadChart()

@@ -7,13 +7,12 @@ import pandas as pd
 from datetime import datetime, timedelta
 import math
 
-TEAM_ID = "1063" #FROM LAST YEAR
-PAYLOAD_ID = "5063"  #FROM LAST YEAR
+TEAM_ID = "1032" #FROM LAST YEAR
 PACKET_TYPE = 67
 PACKET_TYPE2 = 80
 startTime = NULL
 
-file = open('Flight_'+PAYLOAD_ID+'_'+chr(PACKET_TYPE2)+'.csv', 'w', newline='')
+file = open('Flight_'+TEAM_ID+'.csv', 'w', newline='')
 
 writer = csv.writer(file)
 
@@ -35,7 +34,7 @@ while i < 600:
 
     i+=1
 
-    with open('Flight_'+PAYLOAD_ID+'_'+chr(PACKET_TYPE2)+'.csv', 'a', newline='') as file:
+    with open('Flight_'+TEAM_ID+'.csv', 'a', newline='') as file:
         writer = csv.writer(file)
 
         rand = random.randint(0,100)
@@ -49,7 +48,7 @@ while i < 600:
         if (i == 1):
             startTime = datetime.now()
 
-        writer.writerow([PAYLOAD_ID,datetime.now().strftime("%H:%M:%S"),i, 'F', 'LAUNCH_WAIT',
+        writer.writerow([TEAM_ID,datetime.now().strftime("%H:%M:%S"),i, 'F', 'LAUNCH_WAIT',
         rand7, 'N', 'N', 'N', rand5, rand, datetime.now().strftime("%H:%M:%S"), rand3, rand5,
         rand4, rand5, rand6, rand7, 'CXON' , str(math.floor((datetime.now()-startTime).total_seconds())), rand8])
 
