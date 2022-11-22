@@ -184,8 +184,6 @@ def getPayloadData():
         tiltX = data['TILT_X']
         tiltY = data['TILT_Y']
 
-        print(MAST_RAISE)
-
         _VARS['window']['PC1'].update('Packet Count : ' + str(PC1))
         _VARS['window']['STATE'].update('Software State : ' + SS1)
 

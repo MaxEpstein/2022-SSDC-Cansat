@@ -7,7 +7,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import math
 
-TEAM_ID = "1063" #FROM LAST YEAR
+TEAM_ID = "1032" 
 PAYLOAD_ID = "5063"  #FROM LAST YEAR
 PACKET_TYPE = 67
 PACKET_TYPE2 = 80
@@ -25,7 +25,7 @@ writer = csv.writer(file)
 writer.writerow(["TEAM_ID", "MISSION_TIME", "PACKET_COUNT", "MODE", "STATE", "ALTITUDE", 
 "HS_DEPLOYED", "PC_DEPLOYED", "MAST_RAISED", "TEMPERATURE", "VOLTAGE", 
 "GPS_TIME", "GPS_ALTITUDE", "GPS_LATITUDE", "GPS_LONGITUDE", "GPS_SATS",
-"TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"])
+"TILT_X", "TILT_Y", "CMD_ECHO", "T+ Time"]) #include acceleration
 
 file.close()
 
